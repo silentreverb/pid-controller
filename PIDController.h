@@ -8,6 +8,11 @@
 #ifndef PIDCONTROLLER_H
 #define	PIDCONTROLLER_H
 
+#include <boost/timer/timer.hpp>
+#include <boost/chrono.hpp>
+#include <iostream>
+#include <cmath>
+
 class PIDController {
     public:
         PIDController();
@@ -27,18 +32,18 @@ class PIDController {
 
         void init();
         bool isSettled();
-        double calc(double feedback, double nowTime);
+        double calc(double feedback);
 
         
     private:
         double setpoint; 
         double kp, ki, kd;
         double lowerConstraint, upperConstraint;
-        double lastError;
+        boost::timer::cpu_timer sample_timer;
+		boost::timer::cpu_timer performance_timer;
+		double lastError;
 		double lastProcessVariable;
-        double lastTime;
         double integrator;
-        
 };
 
 #endif	/* PIDCONTROLLER_H */

@@ -6,10 +6,6 @@
  */
 
 #include "PIDController.h"
-#include <iostream>
-#include <cmath>
-
-using namespace std;
 
 PIDController::PIDController(double kp, double ki, double kd) {
     this->setGains(kp, ki, kd);
@@ -34,7 +30,6 @@ PIDController::PIDController(const PIDController& orig) {
     this->setConstraints(orig.lowerConstraint, orig.upperConstraint);
     integrator = orig.integrator;
     lastError = orig.lastError;
-    lastTime = orig.lastTime;
 }
 
 PIDController::~PIDController() {
@@ -75,16 +70,17 @@ void PIDController::init() {
     setpoint = 0;
     integrator = 0;
     lastError = 0;
-	lastProcessVariable = 123456;
-    lastTime = 0;    
+	lastProcessVariable = -123456;
+    sample_timer.stop();
+	performance_timer.stop();   
 }
 
 bool PIDController::isSettled() {
 
 	double percent = 1-(lastProcessVariable/setpoint);
 
-	cout<<"Percent: "<<percent<<endl;	
-
+	std::cout<<"Percent: "<<percent<<std::endl;	
+	
 	if(abs(percent) < 0.05)
 	{
 		return true;
@@ -95,9 +91,10 @@ bool PIDController::isSettled() {
 	}
 }
 
-double PIDController::calc(double processVariable, double nowTime) {
-    double error = setpoint - processVariable;
-    double samplingTime = nowTime - lastTime;
+double PIDController::calc(double processVariable) {
+    sample_timer.stop();
+	double error = setpoint - processVariable;
+    double samplingTime = boost::chrono::duration_cast<boost::chrono::seconds>(boost::chrono::nanoseconds(sample_timer.elapsed().wall)).count();
     double differentiator = (error - lastError)/samplingTime;
     integrator += (error * samplingTime);
     double controlVariable = kp * error + ki * integrator + kd * differentiator;
@@ -109,8 +106,9 @@ double PIDController::calc(double processVariable, double nowTime) {
     }
     lastError = error;
 	lastProcessVariable = processVariable;
-    lastTime = nowTime;
-    
+
+	sample_timer.start();
+
     return controlVariable;
 }
 
