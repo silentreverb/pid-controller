@@ -7,6 +7,8 @@
 
 #include "PIDController.h"
 
+using namespace boost::chrono;
+
 PIDController::PIDController(double kp, double ki, double kd) {
     this->setGains(kp, ki, kd);
     this->setConstraints(-1, -1);
@@ -37,6 +39,11 @@ PIDController::~PIDController() {
         
 void PIDController::targetSetpoint(double setpoint) {
     this->setpoint = setpoint;
+    peakTime = -1;
+	settlingTime = -1;
+	percentOvershoot = 0;
+    sample_timer.start();
+    performance_timer.start();
 }
 
 void PIDController::setGains(double kp, double ki, double kd) {
@@ -70,31 +77,44 @@ void PIDController::init() {
     setpoint = 0;
     integrator = 0;
     lastError = 0;
-	lastProcessVariable = -123456;
+	peakTime = -1;
+	settlingTime = -1;
+	percentOvershoot = 0;
     sample_timer.stop();
 	performance_timer.stop();   
 }
 
-bool PIDController::isSettled() {
-
-	double percent = 1-(lastProcessVariable/setpoint);
-
-	std::cout<<"Percent: "<<percent<<std::endl;	
-	
-	if(abs(percent) < 0.05)
-	{
+bool PIDController::hasSettled() {
+	if(settlingTime != -1) {
 		return true;
 	}
-	else
-	{
+	
+	else {
 		return false;
 	}
 }
 
 double PIDController::calc(double processVariable) {
     sample_timer.stop();
+	
+	double percent = (processVariable/setpoint) - 1;
+	
+	if(percent > percentOvershoot && percent > 0)
+	{
+		percentOvershoot = processVariable/setpoint;
+		peakTime = duration_cast<seconds>(nanoseconds(performance_timer.elapsed().wall)).count();
+	}
+	if(abs(percent) < 0.05 && settlingTime == -1)
+	{
+		performance_timer.stop();
+		settlingTime = duration_cast<seconds>(nanoseconds(performance_timer.elapsed().wall)).count();
+		std::cout << "Peak Time Tp: " << peakTime << std::endl;
+		std::cout << "Percent Overshoot %OS: " << percentOvershoot << std::endl;
+		std::cout << "Settling Time Ts" << settlingTime << std::endl;
+	}
+	
 	double error = setpoint - processVariable;
-    double samplingTime = boost::chrono::duration_cast<boost::chrono::seconds>(boost::chrono::nanoseconds(sample_timer.elapsed().wall)).count();
+    double samplingTime = duration_cast<seconds>(nanoseconds(sample_timer.elapsed().wall)).count();
     double differentiator = (error - lastError)/samplingTime;
     integrator += (error * samplingTime);
     double controlVariable = kp * error + ki * integrator + kd * differentiator;
@@ -105,7 +125,6 @@ double PIDController::calc(double processVariable) {
         controlVariable = upperConstraint;
     }
     lastError = error;
-	lastProcessVariable = processVariable;
 
 	sample_timer.start();
 

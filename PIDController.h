@@ -31,7 +31,7 @@ class PIDController {
         double getKd();
 
         void init();
-        bool isSettled();
+        bool hasSettled();
         double calc(double feedback);
 
         
@@ -42,8 +42,10 @@ class PIDController {
         boost::timer::cpu_timer sample_timer;
 		boost::timer::cpu_timer performance_timer;
 		double lastError;
-		double lastProcessVariable;
         double integrator;
+        double peakTime;
+        double settlingTime;
+        double percentOvershoot;
 };
 
 #endif	/* PIDCONTROLLER_H */
