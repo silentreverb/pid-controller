@@ -15,7 +15,7 @@ PIDController::PIDController(double kp, double ki, double kd) {
     this->init();
 }
 
-PIDController::PIDController(double newKp, double newKi, double newKd, double lowerConstraint, double upperConstraint) {
+PIDController::PIDController(double kp, double ki, double kd, double lowerConstraint, double upperConstraint) {
     this->setGains(kp, ki, kd);
     this->setConstraints(lowerConstraint, upperConstraint);
     this->init();
@@ -102,20 +102,20 @@ double PIDController::calc(double processVariable) {
 	if(percent > percentOvershoot && percent > 0)
 	{
 		percentOvershoot = processVariable/setpoint;
-		peakTime = duration_cast<seconds>(nanoseconds(performance_timer.elapsed().wall)).count();
+		peakTime = (performance_timer.elapsed().wall)/1e9;
 	}
 	if(abs(percent) < 0.05 && settlingTime == -1)
 	{
 		performance_timer.stop();
-		settlingTime = duration_cast<seconds>(nanoseconds(performance_timer.elapsed().wall)).count();
+		settlingTime = (performance_timer.elapsed().wall)/1e9;
 		std::cout << "Peak Time Tp: " << peakTime << std::endl;
 		std::cout << "Percent Overshoot %OS: " << percentOvershoot << std::endl;
 		std::cout << "Settling Time Ts" << settlingTime << std::endl;
 	}
 	
 	double error = setpoint - processVariable;
-    double samplingTime = duration_cast<seconds>(nanoseconds(sample_timer.elapsed().wall)).count();
-    double differentiator = (error - lastError)/samplingTime;
+    double samplingTime = (sample_timer.elapsed().wall)/1e9;
+	double differentiator = (error - lastError)/samplingTime;
     integrator += (error * samplingTime);
     double controlVariable = kp * error + ki * integrator + kd * differentiator;
     if(controlVariable < lowerConstraint) {
