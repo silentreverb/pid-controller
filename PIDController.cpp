@@ -1,7 +1,14 @@
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+
 #include "PIDController.h"
 
-using namespace boost::chrono;
+//------------------------------------------------------------------------------
+// Constructors
+//------------------------------------------------------------------------------
 
+// Default constructor
 PIDController::PIDController() {
     this->setGains(0, 0, 0);
     this->setInputLimits(-1, -1);
@@ -9,13 +16,14 @@ PIDController::PIDController() {
     this->reset();
 }
 
+// Just gains, no limits
 PIDController::PIDController(double kp, double ki, double kd) {
     this->setGains(kp, ki, kd);
     this->setInputLimits(-1, -1);
     this->setOutputLimits(-1, -1);
     this->reset();
 }
-
+// Gains and output limits
 PIDController::PIDController(double kp, double ki, double kd, double lowerOutputLimit, double upperOutputLimit) {
     this->setGains(kp, ki, kd);
     this->setInputLimits(-1, -1);
@@ -23,6 +31,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerOutput
     this->reset();
 }
 
+// All gains and limits
 PIDController::PIDController(double kp, double ki, double kd, double lowerInputLimit, double upperInputLimit, double lowerOutputLimit, double upperOutputLimit) {
     this->setGains(kp, ki, kd);
     this->setInputLimits(lowerInputLimit, upperInputLimit);
@@ -30,7 +39,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerInputL
     this->reset();
 }
 
-
+// Copy constructor
 PIDController::PIDController(const PIDController& orig) {
     this->setGains(orig.kp, orig.ki, orig.kd);
     this->setInputLimits(orig.lowerInputLimit, orig.upperInputLimit);
@@ -42,9 +51,45 @@ PIDController::PIDController(const PIDController& orig) {
     percentOvershoot = orig.percentOvershoot;
 }
 
+// Destructor
 PIDController::~PIDController() {
 }
-        
+
+//------------------------------------------------------------------------------
+// Accessors
+//------------------------------------------------------------------------------
+
+double PIDController::getSetpoint() {
+    return setpoint;
+}
+
+double PIDController::getKp() {
+    return kp;
+}
+
+double PIDController::getKi() {
+    return ki;
+}
+
+double PIDController::getKd() {
+    return kd;
+}
+
+//------------------------------------------------------------------------------
+// Mutators
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// targetSetpoint
+//------------------------------------------------------------------------------
+//
+// Return Value : None
+// Parameters   : setpoint
+//
+// This function sets the desired setpoint that the PID controller will
+// attempt to track.
+//------------------------------------------------------------------------------
+
 void PIDController::targetSetpoint(double setpoint) {
     this->setpoint = limiter(setpoint, lowerInputLimit, upperInputLimit);
     peakTime = -1;
@@ -54,16 +99,49 @@ void PIDController::targetSetpoint(double setpoint) {
     performance_timer.start();
 }
 
+//------------------------------------------------------------------------------
+// setGains
+//------------------------------------------------------------------------------
+//
+// Return Value : None
+// Parameters   : kp, ki, kd
+//
+// This function sets the control gains of the PID controller in order to
+// achieve the desired performance characteristics.
+//------------------------------------------------------------------------------
+
 void PIDController::setGains(double kp, double ki, double kd) {
     this->kp = kp;
     this->ki = ki;
     this->kd = kd;
 }
 
+//------------------------------------------------------------------------------
+// setInputLimits
+//------------------------------------------------------------------------------
+//
+// Return Value : None
+// Parameters   : lowerInputLimit, upperInputLimit
+//
+// This function allows the user to set bounds on the setpoint to prevent
+// undesirable behavior of the system.
+//------------------------------------------------------------------------------
+
 void PIDController::setInputLimits(double lowerInputLimit, double upperInputLimit) {
     this->lowerInputLimit = lowerInputLimit;
     this->upperInputLimit = upperInputLimit;
 }
+
+//------------------------------------------------------------------------------
+// setOutputLimits
+//------------------------------------------------------------------------------
+//
+// Return Value : None
+// Parameters   : lowerOutputLimit, upperOutputLimit
+//
+// This function allows to user to set bounds on the control variable to prevent
+// undesirable behavior of the system.
+//------------------------------------------------------------------------------
 
 void PIDController::setOutputLimits(double lowerOutputLimit, double upperOutputLimit) {
     this->lowerOutputLimit = lowerOutputLimit;
@@ -82,22 +160,6 @@ double PIDController::limiter(double value, double lowerLimit, double upperLimit
     }
     else
         return value;
-}
-
-double PIDController::getSetpoint() {
-    return setpoint;
-}
-
-double PIDController::getKp() {
-    return kp;
-}
-
-double PIDController::getKi() {
-    return ki;
-}
-
-double PIDController::getKd() {
-    return kd;
 }
 
 void PIDController::reset() {
