@@ -9,36 +9,51 @@
 
 using namespace boost::chrono;
 
-PIDController::PIDController(double kp, double ki, double kd) {
-    this->setGains(kp, ki, kd);
-    this->setConstraints(-1, -1);
-    this->init();
-}
-
-PIDController::PIDController(double kp, double ki, double kd, double lowerConstraint, double upperConstraint) {
-    this->setGains(kp, ki, kd);
-    this->setConstraints(lowerConstraint, upperConstraint);
-    this->init();
-}
-
 PIDController::PIDController() {
     this->setGains(0, 0, 0);
-    this->setConstraints(-100,100);
-    this->init();
+    this->setInputLimits(-1, -1);
+    this->setOutputLimits(-1, -1);
+    this->reset();
 }
+
+PIDController::PIDController(double kp, double ki, double kd) {
+    this->setGains(kp, ki, kd);
+    this->setInputLimits(-1, -1);
+    this->setOutputLimits(-1, -1);
+    this->reset();
+}
+
+PIDController::PIDController(double kp, double ki, double kd, double lowerOutputLimit, double upperOutputLimit) {
+    this->setGains(kp, ki, kd);
+    this->setInputLimits(-1, -1);
+    this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
+    this->reset();
+}
+
+PIDController::PIDController(double kp, double ki, double kd, double lowerInputLimit, double upperInputLimit, double lowerOutputLimit, double upperOutputLimit) {
+    this->setGains(kp, ki, kd);
+    this->setInputLimits(lowerInputLimit, lowerInputLimit);
+    this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
+    this->reset();
+}
+
 
 PIDController::PIDController(const PIDController& orig) {
     this->setGains(orig.kp, orig.ki, orig.kd);
-    this->setConstraints(orig.lowerConstraint, orig.upperConstraint);
+    this->setInputLimits(orig.lowerInputLimit, orig.upperInputLimit);
+    this->setOutputLimits(orig.lowerOutputLimit, orig.lowerInputLimit);
     integrator = orig.integrator;
     lastError = orig.lastError;
+    peakTime = orig.peakTime;
+    settlingTime = orig.settlingTime;
+    percentOvershoot = orig.percentOvershoot;
 }
 
 PIDController::~PIDController() {
 }
         
 void PIDController::targetSetpoint(double setpoint) {
-    this->setpoint = setpoint;
+    this->setpoint = limiter(setpoint, lowerInputLimit, upperInputLimit);
     peakTime = -1;
     settlingTime = -1;
     percentOvershoot = 0;
@@ -52,9 +67,28 @@ void PIDController::setGains(double kp, double ki, double kd) {
     this->kd = kd;
 }
 
-void PIDController::setConstraints(double lowerConstraint, double upperConstraint) {
-    this->lowerConstraint = lowerConstraint;
-    this->upperConstraint = upperConstraint;
+void PIDController::setInputLimits(double lowerInputLimit, double upperInputLimit) {
+    this->lowerInputLimit = lowerInputLimit;
+    this->upperInputLimit = upperInputLimit;
+}
+
+void PIDController::setOutputLimits(double lowerOutputLimit, double upperOutputLimit) {
+    this->lowerOutputLimit = lowerOutputLimit;
+    this->upperOutputLimit = upperOutputLimit;
+}
+
+double PIDController::limiter(double value, double lowerLimit, double upperLimit) {
+    if (lowerLimit == upperLimit) {
+        return value;
+    }
+    else if(value < lowerLimit) {
+        return lowerLimit;
+    }
+    else if(value > upperLimit) {
+        return upperLimit;
+    }
+    else
+        return value;
 }
 
 double PIDController::getSetpoint() {
@@ -73,7 +107,7 @@ double PIDController::getKd() {
     return kd;
 }
 
-void PIDController::init() {
+void PIDController::reset() {
     setpoint = 0;
     integrator = 0;
     lastError = 0;
@@ -118,16 +152,11 @@ double PIDController::calc(double processVariable) {
     double differentiator = (error - lastError)/samplingTime;
     integrator += (error * samplingTime);
     double controlVariable = kp * error + ki * integrator + kd * differentiator;
-    if(controlVariable < lowerConstraint) {
-        controlVariable = lowerConstraint;
-    }
-    else if(controlVariable > upperConstraint) {
-        controlVariable = upperConstraint;
-    }
-    lastError = error;
+    
+    controlVariable = limiter(controlVariable, lowerOutputLimit, upperOutputLimit);
 
+    lastError = error;
     sample_timer.start();
 
     return controlVariable;
 }
-

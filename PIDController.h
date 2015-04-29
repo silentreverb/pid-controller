@@ -6,7 +6,7 @@
  */
 
 #ifndef PIDCONTROLLER_H
-#define	PIDCONTROLLER_H
+#define PIDCONTROLLER_H
 
 #include <boost/timer/timer.hpp>
 #include <boost/chrono.hpp>
@@ -16,21 +16,22 @@
 class PIDController {
     public:
         PIDController();
+        PIDController(double kp, double ki, double kd);
+        PIDController(double kp, double ki, double kd, double lowerOutputLimit, double upperOutputLimit);
+        PIDController(double newKp, double newKi, double newKd, double lowerInputLimit, double upperInputLimit, double lowerOutputLimit, double upperOutputLimit);
         PIDController(const PIDController& orig);
-        PIDController(double newKp, double newKi, double newKd);
-        PIDController(double newKp, double newKi, double newKd, double lowerConstraint, double upperConstraint);
         virtual ~PIDController();
         
         void targetSetpoint(double setpoint);
         void setGains(double kp, double ki, double kd);
-        void setConstraints(double lowerConstraint, double upperConstraint);
-        
+        void setInputLimits(double lowerLimit, double upperLimit);
+        void setOutputLimits(double lowerLimit, double upperLimit);
         double getSetpoint();
         double getKp();
         double getKi();
         double getKd();
 
-        void init();
+        void reset();
         bool hasSettled();
         double calc(double feedback);
 
@@ -38,15 +39,18 @@ class PIDController {
     private:
         double setpoint; 
         double kp, ki, kd;
-        double lowerConstraint, upperConstraint;
+        double lowerInputLimit, upperInputLimit;
+        double lowerOutputLimit, upperOutputLimit;
         boost::timer::cpu_timer sample_timer;
-		boost::timer::cpu_timer performance_timer;
-		double lastError;
+        boost::timer::cpu_timer performance_timer;
+        double lastError;
         double integrator;
         double peakTime;
         double settlingTime;
         double percentOvershoot;
+        
+        double limiter(double value, double lowerLimit, double upperLimit);
 };
 
-#endif	/* PIDCONTROLLER_H */
+#endif  /* PIDCONTROLLER_H */
 
