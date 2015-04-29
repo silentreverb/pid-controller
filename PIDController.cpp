@@ -1,10 +1,3 @@
-/* 
- * File:   PIDController.cpp
- * Author: User
- * 
- * Created on April 22, 2014, 6:28 PM
- */
-
 #include "PIDController.h"
 
 using namespace boost::chrono;
@@ -32,7 +25,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerOutput
 
 PIDController::PIDController(double kp, double ki, double kd, double lowerInputLimit, double upperInputLimit, double lowerOutputLimit, double upperOutputLimit) {
     this->setGains(kp, ki, kd);
-    this->setInputLimits(lowerInputLimit, lowerInputLimit);
+    this->setInputLimits(lowerInputLimit, upperInputLimit);
     this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
     this->reset();
 }
