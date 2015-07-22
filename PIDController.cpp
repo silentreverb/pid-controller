@@ -139,14 +139,29 @@ void PIDController::setInputLimits(double lowerInputLimit, double upperInputLimi
 // Return Value : None
 // Parameters   : lowerOutputLimit, upperOutputLimit
 //
-// This function allows to user to set bounds on the control variable to prevent
-// undesirable behavior of the system.
+// This function allows the user to set bounds on the control variable to
+// prevent undesirable behavior of the system.
 //------------------------------------------------------------------------------
 
 void PIDController::setOutputLimits(double lowerOutputLimit, double upperOutputLimit) {
     this->lowerOutputLimit = lowerOutputLimit;
     this->upperOutputLimit = upperOutputLimit;
 }
+
+//------------------------------------------------------------------------------
+// Other Functions
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// limiter
+//------------------------------------------------------------------------------
+//
+// Return Value : double
+// Parameters   : value, lowerLimit, upperLimit
+//
+// This function compares the input 'value' to the specified limits. If the
+// value exceeds the limits, the value is capped to one of the limits.
+//------------------------------------------------------------------------------
 
 double PIDController::limiter(double value, double lowerLimit, double upperLimit) {
     if (lowerLimit == upperLimit) {
@@ -162,6 +177,16 @@ double PIDController::limiter(double value, double lowerLimit, double upperLimit
         return value;
 }
 
+//------------------------------------------------------------------------------
+// reset
+//------------------------------------------------------------------------------
+//
+// Return Value : None
+// Parameters   : None
+//
+// This function initializes the PID controller to the default values.
+//------------------------------------------------------------------------------
+
 void PIDController::reset() {
     setpoint = 0;
     integrator = 0;
@@ -173,6 +198,17 @@ void PIDController::reset() {
     performance_timer.stop();   
 }
 
+//------------------------------------------------------------------------------
+// hasSettled
+//------------------------------------------------------------------------------
+//
+// Return Value : bool
+// Parameters   : None
+//
+// This function returns true only when the PID controller has stabilized to
+// within 5% of its final value.
+//------------------------------------------------------------------------------
+
 bool PIDController::hasSettled() {
     if(settlingTime != -1) {
         return true;
@@ -182,6 +218,19 @@ bool PIDController::hasSettled() {
         return false;
     }
 }
+
+//------------------------------------------------------------------------------
+// calc
+//------------------------------------------------------------------------------
+//
+// Return Value : double
+// Parameters   : processVariable
+//
+// This function calculates the next output value of the PID controller, given
+// the current setpoint, elasped time, and feedback (processVariable). It also
+// keeps track of peak time, settling time, and percent overshoot for quickly
+// assessing the current performance of the controller.
+//------------------------------------------------------------------------------
 
 double PIDController::calc(double processVariable) {
     sample_timer.stop();
