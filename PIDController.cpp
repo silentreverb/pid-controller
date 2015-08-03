@@ -255,6 +255,7 @@ double PIDController::calc(double processVariable) {
     double samplingTime = (sample_timer.elapsed().wall)/1e9;
     double differentiator = (error - lastError)/samplingTime;
     integrator += (error * samplingTime);
+    integrator = limiter(integrator, lowerOutputLimit, upperOutputLimit);
     double controlVariable = kp * error + ki * integrator + kd * differentiator;
     
     controlVariable = limiter(controlVariable, lowerOutputLimit, upperOutputLimit);
