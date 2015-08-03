@@ -14,6 +14,7 @@ PIDController::PIDController() {
     this->setInputLimits(-1, -1);
     this->setOutputLimits(-1, -1);
     this->reset();
+    this->on();
 }
 
 // Just gains, no limits
@@ -21,14 +22,18 @@ PIDController::PIDController(double kp, double ki, double kd) {
     this->setGains(kp, ki, kd);
     this->setInputLimits(-1, -1);
     this->setOutputLimits(-1, -1);
+    lastControlVariable = 0;
     this->reset();
+    this->on();
 }
 // Gains and output limits
 PIDController::PIDController(double kp, double ki, double kd, double lowerOutputLimit, double upperOutputLimit) {
     this->setGains(kp, ki, kd);
     this->setInputLimits(-1, -1);
     this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
+    lastControlVariable = 0;
     this->reset();
+    this->on();
 }
 
 // All gains and limits
@@ -36,7 +41,9 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerInputL
     this->setGains(kp, ki, kd);
     this->setInputLimits(lowerInputLimit, upperInputLimit);
     this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
+    lastControlVariable = 0;
     this->reset();
+    this->on();
 }
 
 // Copy constructor
@@ -44,8 +51,10 @@ PIDController::PIDController(const PIDController& orig) {
     this->setGains(orig.kp, orig.ki, orig.kd);
     this->setInputLimits(orig.lowerInputLimit, orig.upperInputLimit);
     this->setOutputLimits(orig.lowerOutputLimit, orig.lowerInputLimit);
+    isEnabled = orig.isEnabled;
     integrator = orig.integrator;
     lastSetpoint = orig.lastSetpoint;
+    lastControlVariable = orig.lastControlVariable;
     peakTime = orig.peakTime;
     settlingTime = orig.settlingTime;
     percentOvershoot = orig.percentOvershoot;
@@ -153,6 +162,38 @@ void PIDController::setOutputLimits(double lowerOutputLimit, double upperOutputL
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+// off
+//------------------------------------------------------------------------------
+//
+// Return Value : None
+// Parameters   : None
+//
+// This function disables the PID controller for adjustment of the plant through
+// an external process.
+//------------------------------------------------------------------------------
+
+void PIDController::off() {
+    isEnabled = false;
+}
+
+//------------------------------------------------------------------------------
+// on
+//------------------------------------------------------------------------------
+//
+// Return Value : None
+// Parameters   : None
+//
+// This function re-enables the PID controller after it has been disabled by the
+// off() function.
+//------------------------------------------------------------------------------
+
+void PIDController::on() {
+    isEnabled = true;
+    this->reset();
+    this->targetSetpoint(setpoint);
+}
+
+//------------------------------------------------------------------------------
 // limiter
 //------------------------------------------------------------------------------
 //
@@ -190,7 +231,7 @@ double PIDController::limiter(double value, double lowerLimit, double upperLimit
 void PIDController::reset() {
     setpoint = 0;
     lastSetpoint = 0;
-    integrator = 0;
+    integrator = lastControlVariable;
     peakTime = -1;
     settlingTime = -1;
     percentOvershoot = 0;
@@ -233,6 +274,9 @@ bool PIDController::hasSettled() {
 //------------------------------------------------------------------------------
 
 double PIDController::calc(double processVariable) {
+    if(!isEnabled) {
+        return lastControlVariable;
+    }
     sample_timer.stop();
     
     double percent = (processVariable/setpoint) - 1;
@@ -259,7 +303,7 @@ double PIDController::calc(double processVariable) {
     double controlVariable = kp * error + ki * integrator - kd * differentiator;
     
     controlVariable = limiter(controlVariable, lowerOutputLimit, upperOutputLimit);
-
+    lastControlVariable = controlVariable;
     lastSetpoint = setpoint;
     sample_timer.start();
 

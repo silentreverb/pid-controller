@@ -24,6 +24,8 @@ class PIDController {
         
         void targetSetpoint(double setpoint);
         void setGains(double kp, double ki, double kd);
+        void off();
+        void on();
         void setInputLimits(double lowerLimit, double upperLimit);
         void setOutputLimits(double lowerLimit, double upperLimit);
         double getSetpoint();
@@ -37,8 +39,10 @@ class PIDController {
 
         
     private:
+        bool isEnabled;
         double setpoint; 
         double lastSetpoint;
+        double lastControlVariable;
         double kp, ki, kd;
         double lowerInputLimit, upperInputLimit;
         double lowerOutputLimit, upperOutputLimit;
