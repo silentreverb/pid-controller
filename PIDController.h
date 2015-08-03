@@ -38,12 +38,12 @@ class PIDController {
         
     private:
         double setpoint; 
+        double lastSetpoint;
         double kp, ki, kd;
         double lowerInputLimit, upperInputLimit;
         double lowerOutputLimit, upperOutputLimit;
         boost::timer::cpu_timer sample_timer;
         boost::timer::cpu_timer performance_timer;
-        double lastError;
         double integrator;
         double peakTime;
         double settlingTime;

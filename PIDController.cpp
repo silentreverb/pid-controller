@@ -45,7 +45,7 @@ PIDController::PIDController(const PIDController& orig) {
     this->setInputLimits(orig.lowerInputLimit, orig.upperInputLimit);
     this->setOutputLimits(orig.lowerOutputLimit, orig.lowerInputLimit);
     integrator = orig.integrator;
-    lastError = orig.lastError;
+    lastSetpoint = orig.lastSetpoint;
     peakTime = orig.peakTime;
     settlingTime = orig.settlingTime;
     percentOvershoot = orig.percentOvershoot;
@@ -189,8 +189,8 @@ double PIDController::limiter(double value, double lowerLimit, double upperLimit
 
 void PIDController::reset() {
     setpoint = 0;
+    lastSetpoint = 0;
     integrator = 0;
-    lastError = 0;
     peakTime = -1;
     settlingTime = -1;
     percentOvershoot = 0;
@@ -253,14 +253,14 @@ double PIDController::calc(double processVariable) {
     
     double error = setpoint - processVariable;
     double samplingTime = (sample_timer.elapsed().wall)/1e9;
-    double differentiator = (error - lastError)/samplingTime;
+    double differentiator = (setpoint - lastSetpoint)/samplingTime;
     integrator += (error * samplingTime);
     integrator = limiter(integrator, lowerOutputLimit, upperOutputLimit);
-    double controlVariable = kp * error + ki * integrator + kd * differentiator;
+    double controlVariable = kp * error + ki * integrator - kd * differentiator;
     
     controlVariable = limiter(controlVariable, lowerOutputLimit, upperOutputLimit);
 
-    lastError = error;
+    lastSetpoint = setpoint;
     sample_timer.start();
 
     return controlVariable;
