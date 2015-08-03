@@ -247,7 +247,7 @@ double PIDController::calc(double processVariable) {
         performance_timer.stop();
         settlingTime = (performance_timer.elapsed().wall)/1e9;
         std::cout << "Peak Time Tp: " << peakTime << std::endl;
-        std::cout << "Percent Overshoot %OS: " << percentOvershoot << std::endl;
+        std::cout << "Percent Overshoot \%OS: " << percentOvershoot << std::endl;
         std::cout << "Settling Time Ts" << settlingTime << std::endl;
     }
     
