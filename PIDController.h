@@ -24,8 +24,6 @@ class PIDController {
         
         void targetSetpoint(double setpoint);
         void setGains(double kp, double ki, double kd);
-        void off();
-        void on();
         void setInputLimits(double lowerLimit, double upperLimit);
         void setOutputLimits(double lowerLimit, double upperLimit);
         double getSetpoint();
@@ -34,24 +32,17 @@ class PIDController {
         double getKd();
 
         void reset();
-        bool hasSettled();
         double calc(double feedback);
 
         
     private:
-        bool isEnabled;
         double setpoint; 
         double lastSetpoint;
-        double lastControlVariable;
         double kp, ki, kd;
         double lowerInputLimit, upperInputLimit;
         double lowerOutputLimit, upperOutputLimit;
         boost::timer::cpu_timer sample_timer;
-        boost::timer::cpu_timer performance_timer;
         double integrator;
-        double peakTime;
-        double settlingTime;
-        double percentOvershoot;
         
         double limiter(double value, double lowerLimit, double upperLimit);
 };
