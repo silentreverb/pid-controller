@@ -241,7 +241,7 @@ void PIDController::reset() {
 //------------------------------------------------------------------------------
 
 bool PIDController::hasSettled() {
-    return hasSettled;
+    return setpointReached;
 }
 
 //------------------------------------------------------------------------------
@@ -270,10 +270,10 @@ double PIDController::calc(double processVariable) {
     double percent = (processVariable/setpoint) - 1;
     
     if(abs(diffProcessVariable) < 0.5) {
-		hasSettled = true;
+		setpointReached = true;
 	}
 	else {
-		hasSettled = false;
+		setpointReached = false;
 	}
     
     double differentiator = (setpoint - lastSetpoint)/samplingTime;

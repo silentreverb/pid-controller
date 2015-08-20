@@ -40,7 +40,7 @@ class PIDController {
         
     private:
         bool isEnabled;
-        bool hasSettled;
+        bool setpointReached;
         double setpoint; 
         double lastSetpoint;
         double lastControlVariable;
