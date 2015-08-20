@@ -167,7 +167,7 @@ void PIDController::setOutputLimits(double lowerOutputLimit, double upperOutputL
 
 void PIDController::off() {
     isEnabled = false;
-    hasSettled = false;
+    setpointReached = false;
 }
 
 //------------------------------------------------------------------------------
