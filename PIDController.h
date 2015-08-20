@@ -40,18 +40,16 @@ class PIDController {
         
     private:
         bool isEnabled;
+        bool hasSettled;
         double setpoint; 
         double lastSetpoint;
         double lastControlVariable;
+        double lastProcessVariable;
         double kp, ki, kd;
         double lowerInputLimit, upperInputLimit;
         double lowerOutputLimit, upperOutputLimit;
         boost::timer::cpu_timer sample_timer;
-        boost::timer::cpu_timer performance_timer;
         double integrator;
-        double peakTime;
-        double settlingTime;
-        double percentOvershoot;
         
         double limiter(double value, double lowerLimit, double upperLimit);
 };

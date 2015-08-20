@@ -55,9 +55,6 @@ PIDController::PIDController(const PIDController& orig) {
     integrator = orig.integrator;
     lastSetpoint = orig.lastSetpoint;
     lastControlVariable = orig.lastControlVariable;
-    peakTime = orig.peakTime;
-    settlingTime = orig.settlingTime;
-    percentOvershoot = orig.percentOvershoot;
 }
 
 // Destructor
@@ -101,11 +98,7 @@ double PIDController::getKd() {
 
 void PIDController::targetSetpoint(double setpoint) {
     this->setpoint = limiter(setpoint, lowerInputLimit, upperInputLimit);
-    peakTime = -1;
-    settlingTime = -1;
-    percentOvershoot = 0;
     sample_timer.start();
-    performance_timer.start();
 }
 
 //------------------------------------------------------------------------------
@@ -174,6 +167,7 @@ void PIDController::setOutputLimits(double lowerOutputLimit, double upperOutputL
 
 void PIDController::off() {
     isEnabled = false;
+    hasSettled = false;
 }
 
 //------------------------------------------------------------------------------
@@ -232,11 +226,7 @@ void PIDController::reset() {
     setpoint = 0;
     lastSetpoint = 0;
     integrator = lastControlVariable;
-    peakTime = -1;
-    settlingTime = -1;
-    percentOvershoot = 0;
     sample_timer.stop();
-    performance_timer.stop();   
 }
 
 //------------------------------------------------------------------------------
@@ -251,13 +241,7 @@ void PIDController::reset() {
 //------------------------------------------------------------------------------
 
 bool PIDController::hasSettled() {
-    if(settlingTime != -1) {
-        return true;
-    }
-    
-    else {
-        return false;
-    }
+    return hasSettled;
 }
 
 //------------------------------------------------------------------------------
@@ -279,24 +263,19 @@ double PIDController::calc(double processVariable) {
     }
     sample_timer.stop();
     
-    double percent = (processVariable/setpoint) - 1;
-    
-    if(percent > percentOvershoot && percent > 0)
-    {
-        percentOvershoot = processVariable/setpoint;
-        peakTime = (performance_timer.elapsed().wall)/1e9;
-    }
-    if(abs(percent) < 0.05 && settlingTime == -1)
-    {
-        performance_timer.stop();
-        settlingTime = (performance_timer.elapsed().wall)/1e9;
-        std::cout << "Peak Time Tp: " << peakTime << std::endl;
-        std::cout << "Percent Overshoot \%OS: " << percentOvershoot << std::endl;
-        std::cout << "Settling Time Ts" << settlingTime << std::endl;
-    }
-    
     double error = setpoint - processVariable;
     double samplingTime = (sample_timer.elapsed().wall)/1e9;
+    
+    double diffProcessVariable = (processVariable - lastProcessVariable)/samplingTime;
+    double percent = (processVariable/setpoint) - 1;
+    
+    if(abs(diffProcessVariable) < 0.5) {
+		hasSettled = true;
+	}
+	else {
+		hasSettled = false;
+	}
+    
     double differentiator = (setpoint - lastSetpoint)/samplingTime;
     integrator += (error * samplingTime);
     integrator = limiter(integrator, lowerOutputLimit, upperOutputLimit);
@@ -305,6 +284,8 @@ double PIDController::calc(double processVariable) {
     controlVariable = limiter(controlVariable, lowerOutputLimit, upperOutputLimit);
     lastControlVariable = controlVariable;
     lastSetpoint = setpoint;
+    lastProcessVariable = processVariable;
+    
     sample_timer.start();
 
     return controlVariable;
