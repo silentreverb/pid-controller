@@ -29,7 +29,6 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerOutput
     this->setGains(kp, ki, kd);
     this->setInputLimits(-1, -1);
     this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
-    lastControlVariable = 0;
     this->reset();
 }
 
@@ -185,7 +184,7 @@ double PIDController::limiter(double value, double lowerLimit, double upperLimit
 void PIDController::reset() {
     setpoint = 0;
     lastSetpoint = 0;
-    integrator = lastControlVariable;
+    integrator = 0; //lastControlVariable;
     sample_timer.stop();   
 }
 
@@ -213,7 +212,6 @@ double PIDController::calc(double processVariable) {
     double controlVariable = kp * error + ki * integrator - kd * differentiator;
     
     controlVariable = limiter(controlVariable, lowerOutputLimit, upperOutputLimit);
-    lastControlVariable = controlVariable;
     lastSetpoint = setpoint;
     sample_timer.start();
 
