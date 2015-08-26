@@ -14,7 +14,7 @@ PIDController::PIDController() {
     this->setInputLimits(-1, -1);
     this->setOutputLimits(-1, -1);
     this->reset();
-    this->on();
+    this->off();
 }
 
 // Just gains, no limits
@@ -24,7 +24,7 @@ PIDController::PIDController(double kp, double ki, double kd) {
     this->setOutputLimits(-1, -1);
     lastControlVariable = 0;
     this->reset();
-    this->on();
+    this->off();
 }
 // Gains and output limits
 PIDController::PIDController(double kp, double ki, double kd, double lowerOutputLimit, double upperOutputLimit) {
@@ -33,7 +33,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerOutput
     this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
     lastControlVariable = 0;
     this->reset();
-    this->on();
+    this->off();
 }
 
 // All gains and limits
@@ -43,7 +43,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerInputL
     this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
     lastControlVariable = 0;
     this->reset();
-    this->on();
+    this->off();
 }
 
 // Copy constructor
@@ -183,7 +183,8 @@ void PIDController::off() {
 
 void PIDController::on() {
     isEnabled = true;
-    this->reset();
+    integrator = lastControlVariable;
+    sample_timer.stop();
     this->targetSetpoint(setpoint);
 }
 
