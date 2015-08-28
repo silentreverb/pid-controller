@@ -1,2 +1,21 @@
 # pid-controller
 A simple C++-based PID controller.
+
+## Installation
+This library utilizes the `cmake` cross-platform utility. To build and install the library on UNIX-like systems, execute the following steps in a new terminal.
+
+Create the build directory:
+```
+mkdir build
+cd build
+```
+Generate build scripts:
+```
+cmake ..
+```
+
+Build and install the library:
+```
+make
+sudo make install
+```
