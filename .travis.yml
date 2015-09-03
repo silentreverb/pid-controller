@@ -1,0 +1,6 @@
+language: cpp
+compiler: gcc
+before_script:
+  - sudo apt-get update -qq
+  - sudo apt-get install cmake libboost-system-dev libboost-chrono-dev libboost-timer-dev
+script: mkdir build && cd build && cmake .. && make 
