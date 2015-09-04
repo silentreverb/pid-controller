@@ -11,9 +11,7 @@ addons:
       - libboost-timer1.55-dev
 script: 
   - mkdir build && cd build
-  - cmake ..
-  - make
+  - cmake .. && make
   - sudo make install
   - cd ../example && mkdir build && cd build
-  - cmake ..
-  - make 
+  - cmake .. && make 
