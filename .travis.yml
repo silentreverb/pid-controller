@@ -8,4 +8,8 @@ addons:
       - libboost-system1.55-dev
       - libboost-chrono1.55-dev
       - libboost-timer1.55-dev
-script: mkdir build && cd build && cmake .. && make 
+script: 
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make 
