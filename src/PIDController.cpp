@@ -13,6 +13,8 @@ PIDController::PIDController() {
     this->setGains(0, 0, 0);
     this->setInputLimits(-1, -1);
     this->setOutputLimits(-1, -1);
+    lastControlVariable = 0;
+    lastProcessVariable = 0;
     this->reset();
     this->off();
 }
@@ -23,6 +25,7 @@ PIDController::PIDController(double kp, double ki, double kd) {
     this->setInputLimits(-1, -1);
     this->setOutputLimits(-1, -1);
     lastControlVariable = 0;
+    lastProcessVariable = 0;
     this->reset();
     this->off();
 }
@@ -32,6 +35,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerOutput
     this->setInputLimits(-1, -1);
     this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
     lastControlVariable = 0;
+    lastProcessVariable = 0;
     this->reset();
     this->off();
 }
@@ -42,6 +46,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerInputL
     this->setInputLimits(lowerInputLimit, upperInputLimit);
     this->setOutputLimits(lowerOutputLimit, upperOutputLimit);
     lastControlVariable = 0;
+    lastProcessVariable = 0;
     this->reset();
     this->off();
 }
@@ -51,10 +56,10 @@ PIDController::PIDController(const PIDController& orig) {
     this->setGains(orig.kp, orig.ki, orig.kd);
     this->setInputLimits(orig.lowerInputLimit, orig.upperInputLimit);
     this->setOutputLimits(orig.lowerOutputLimit, orig.lowerInputLimit);
-    isEnabled = orig.isEnabled;
-    integrator = orig.integrator;
-    lastSetpoint = orig.lastSetpoint;
-    lastControlVariable = orig.lastControlVariable;
+    lastControlVariable = 0;
+    lastProcessVariable = 0;
+    this->reset();
+    this->off();
 }
 
 // Destructor
