@@ -1,5 +1,6 @@
 language: cpp
 compiler: gcc
+sudo: required
 addons:
   apt:
     sources:
@@ -9,7 +10,10 @@ addons:
       - libboost-chrono1.55-dev
       - libboost-timer1.55-dev
 script: 
-  - mkdir build
-  - cd build
+  - mkdir build && cd build
+  - cmake ..
+  - make
+  - sudo make install
+  - cd ../example && mkdir build && cd build
   - cmake ..
   - make 
