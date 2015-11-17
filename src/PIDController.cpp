@@ -104,7 +104,7 @@ double PIDController::getKd() {
 void PIDController::targetSetpoint(double setpoint) {
     setpoint = limiter(setpoint, lowerInputLimit, upperInputLimit);
     if(setpoint != this->setpoint) {
-        this->setpoint = newSetpoint;
+        this->setpoint = setpoint;
         sample_timer.start();
     }
 }
