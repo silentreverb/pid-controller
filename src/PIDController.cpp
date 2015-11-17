@@ -190,10 +190,12 @@ void PIDController::off() {
 //------------------------------------------------------------------------------
 
 void PIDController::on() {
-    isEnabled = true;
-    integrator = lastControlVariable;
-    sample_timer.stop();
-    this->targetSetpoint(setpoint);
+    if(!isEnabled) {
+        isEnabled = true;
+        integrator = lastControlVariable;
+        sample_timer.stop();
+        sample_timer.start();
+    }
 }
 
 //------------------------------------------------------------------------------
