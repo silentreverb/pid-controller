@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     cout << "Simulation running..." << endl;
     
     ofstream writeToCsv;
-    writeToCsv.open("PIDExample.csv");
+    writeToCsv.open("PIDexample.csv");
     writeToCsv << "Time,Setpoint,Output" << endl;
 
     while(t < 20) {
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     }
 
 	writeToCsv.close();
-    cout << "Simulation complete! Output saved to PIDExample.csv." << endl;
+    cout << "Simulation complete! Output saved to PIDexample.csv." << endl;
 	
     return 0;
 }
