@@ -8,7 +8,7 @@ add_library(pid-controller SHARED IMPORTED
 set_target_properties(pid-controller PROPERTIES
     IMPORTED_LOCATION /usr/local/lib/libpid-controller.so
 )
-add_executable(PIDexample PIDexample.cpp)
+add_executable(PIDexample src/PIDexample.cpp)
 target_link_libraries(PIDexample
     pid-controller
     ${Boost_LIBRARIES}
