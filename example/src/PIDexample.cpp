@@ -1,7 +1,7 @@
 #include <PIDController.h>
 #include <LaplaceInversion.h>
-#include <complex>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -16,9 +16,9 @@ using namespace std;
 
 
 // Define closed-loop TF for simulation
-complex<double> xferFn(const complex<double> &s) {
-    complex<double> pid = K_P + K_I/s + K_D*s;
-    complex<double> plant = 1.0/((s+PLANT_A)*(s+PLANT_B));
+cmplex xferFn(const cmplex &s) {
+    cmplex pid = K_P + K_I/s + K_D*s;
+    cmplex plant = 1.0/((s+PLANT_A)*(s+PLANT_B));
     
     return SETPOINT*(1.0/s)*(pid*plant)/(1.0+pid*plant*1.0);
 }
@@ -35,17 +35,25 @@ int main(int argc, char *argv[])
 
     double controlVariable = 0; // Init with zero actuation
     double processVariable = 0; // Init with zero position
+   
+    cout << "Simulation running..." << endl;
     
-    cout << "Time,Setpoint,Output" << endl;
+    ofstream writeToCsv;
+    writeToCsv.open("PIDExample.csv");
+    writeToCsv << "Time,Setpoint,Output" << endl;
 
-    while(1) {
-        cout << t << "," << pid->getSetpoint() << "," << processVariable << endl;
+    while(t < 20) {
+        writeToCsv << t << "," << pid->getSetpoint() << "," << processVariable << endl;
+        
         controlVariable = pid->calc(processVariable); // Calculate next controlVariable
         processVariable = LaplaceInversion(xferFn, t, 1e-8); // Simulate plant with TF 1/((s+a)(s+b))
 
         usleep(T*pow(10,6)); // 100ms delay to simulate actuation time
         t += T; // Increment time variable by 100ms
     }
+
+	writeToCsv.close();
+    cout << "Simulation complete! Output saved to PIDExample.csv." << endl;
 	
-	return 0;
+    return 0;
 }
