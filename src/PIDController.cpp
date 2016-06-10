@@ -17,6 +17,7 @@ PIDController::PIDController() {
     lastProcessVariable = 0;
     this->reset();
     this->off();
+    error = 0;
 }
 
 // Just gains, no limits
@@ -28,6 +29,7 @@ PIDController::PIDController(double kp, double ki, double kd) {
     lastProcessVariable = 0;
     this->reset();
     this->off();
+    error = 0;
 }
 // Gains and output limits
 PIDController::PIDController(double kp, double ki, double kd, double lowerOutputLimit, double upperOutputLimit) {
@@ -38,6 +40,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerOutput
     lastProcessVariable = 0;
     this->reset();
     this->off();
+    error = 0;
 }
 
 // All gains and limits
@@ -49,6 +52,7 @@ PIDController::PIDController(double kp, double ki, double kd, double lowerInputL
     lastProcessVariable = 0;
     this->reset();
     this->off();
+    error = 0;
 }
 
 // Copy constructor
@@ -60,6 +64,7 @@ PIDController::PIDController(const PIDController& orig) {
     lastProcessVariable = 0;
     this->reset();
     this->off();
+    error = 0;
 }
 
 // Destructor
@@ -256,6 +261,21 @@ bool PIDController::hasSettled() {
 }
 
 //------------------------------------------------------------------------------
+// hasSettled
+//------------------------------------------------------------------------------
+//
+// Return Value : bool
+// Parameters   : None
+//
+// This function returns true only when the PID controller has stabilized to
+// within 5% of its final value.
+//------------------------------------------------------------------------------
+
+double PIDController::getError() {
+	return error;
+}
+
+//------------------------------------------------------------------------------
 // calc
 //------------------------------------------------------------------------------
 //
@@ -274,7 +294,7 @@ double PIDController::calc(double processVariable) {
     }
     sample_timer.stop();
     
-    double error = setpoint - processVariable;
+    error = setpoint - processVariable;
     double samplingTime = (sample_timer.elapsed().wall)/1e9;
     
     double diffProcessVariable = (processVariable - lastProcessVariable)/samplingTime;
