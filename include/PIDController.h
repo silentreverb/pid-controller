@@ -29,9 +29,11 @@ class PIDController {
         void setInputLimits(double lowerLimit, double upperLimit);
         void setOutputLimits(double lowerLimit, double upperLimit);
         double getSetpoint();
-        double getKp();
+        double getError();
+	double getKp();
         double getKi();
         double getKd();
+        
 
         void reset();
         bool hasSettled();

@@ -74,6 +74,10 @@ double PIDController::getSetpoint() {
     return setpoint;
 }
 
+double PIDController::getError() {
+    return setpoint - lastControlVariable;
+}
+
 double PIDController::getKp() {
     return kp;
 }
