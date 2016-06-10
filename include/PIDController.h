@@ -29,10 +29,11 @@ class PIDController {
         void setInputLimits(double lowerLimit, double upperLimit);
         void setOutputLimits(double lowerLimit, double upperLimit);
         double getSetpoint();
-        double getKp();
+        double getError();
+	double getKp();
         double getKi();
         double getKd();
-        double getError();
+        
 
         void reset();
         bool hasSettled();
@@ -51,7 +52,6 @@ class PIDController {
         double lowerOutputLimit, upperOutputLimit;
         boost::timer::cpu_timer sample_timer;
         double integrator;
-        double error;
         
         double limiter(double value, double lowerLimit, double upperLimit);
 };
